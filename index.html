@@ -1,0 +1,213 @@
+<script src="js/pixastic.core.js"></script>
+<script src="js/highcharts/highcharts.js"></script>
+<script src="js/highcharts/modules/exporting.js"></script>
+
+<script>
+
+Pixastic.Actions.myhistogram = {
+  process : function(params) {
+
+    var paint = !!params.options.paint;
+    var values = params.options.returnValue || {};
+
+    if (Pixastic.Client.hasCanvasImageData()) {
+      var data = Pixastic.prepareData(params);
+      params.useData = false;
+
+      var rect = params.options.rect;
+      var p = rect.width * rect.height;
+
+      var pix = p*4;
+      var color;
+
+      while (p--) {
+        color = '#' + [
+          data[pix-=4],
+          data[pix+1],
+          data[pix+2]
+        ].map(function (val) {
+          var res = val.toString(16);
+          return res.length < 2 ? "0"+res : res;
+        }).join('');
+
+        values[color] ? values[color]++ : values[color] = 1;
+      }
+
+      return false;
+    }
+  },
+  checkSupport : function() {
+    return Pixastic.Client.hasCanvasImageData();
+  }
+}
+
+
+let img;
+
+async function handleFiles(files) {
+
+  img && document.getElementById("image-container").removeChild(img);
+  img = null;
+
+  const file = Array.prototype.slice.call(files)
+    .find(f => f.type.startsWith('image/'));
+
+  if (!file) {
+    alert("То картинка?");
+    return;
+  }
+
+  document.getElementById("message").classList.add("visible");
+
+  img = document.createElement("img");
+  img.width = 200;
+  document.getElementById("image-container").appendChild(img);
+
+  await new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      img.src = e.target.result;
+      resolve();
+    }
+    reader.readAsDataURL(file);
+  });
+
+  const data = await new Promise(resolve => {
+    const returnValue = {};
+    Pixastic.process(img, 'myhistogram', {returnValue}, function () {
+      const pairs = Object.keys(returnValue)
+        .map(c => [c, returnValue[c]])
+        .sort((a, b) => b[1] - a[1]);
+      const sum = pairs.reduce((acc, [_, count]) => acc + count, 0);
+      resolve(pairs.map(([color, count]) => `${color} ${count} (${(100*count/sum).toFixed(4)}%)`).join("\n"));
+    });
+  });
+
+  document.getElementById("results").value = data;
+  document.getElementById("message").classList.remove("visible");
+  draw();
+}
+
+
+function draw() {
+
+  const {colors, data} = document.getElementById("results").value.split("\n")
+    .map(l => l.match(/(#?[0-9A-Fa-f]{6})\s+(\d+(\.\d+)?).*/))
+    .filter(m => !!m)
+    .map(([_, color, percent]) => [color, percent])
+    .reduce((acc, [color, percent]) => {
+      acc.colors.push(color);
+      acc.data.push(+percent);
+      return acc;
+    }, {colors: [], data: []});
+
+  const title = document.getElementById("title").value;
+  doDraw("chart-container", title, colors, data);
+}
+
+
+function doDraw(containderId, title, colors, data) {
+
+  chart = new Highcharts.Chart({
+
+    chart: {
+      renderTo: containderId,
+      plotBackgroundColor: null,
+      plotBorderWidth: null,
+      plotShadow: false
+    },
+
+    title: {
+      text: title
+    },
+
+    legend: {
+      labelFormatter: function() {
+        return `${this.percentage.toFixed(2)} %`;
+        return `${this.y.toFixed(2)} %`;
+      },
+      layout: 'vertical',
+      verticalAlign: 'top',
+      align: 'right',
+      y: 100
+    },
+
+    tooltip: {
+      formatter: function() {
+        return `${this.percentage} %`;
+        return `${this.y} %`;
+      }
+    },
+
+    plotOptions: {
+      pie: {
+        cursor: 'pointer',
+        dataLabels: {
+          enabled: false
+        },
+        showInLegend: true
+      }
+    },
+
+    colors: colors,
+
+    series: [{
+      type: 'pie',
+      data: data
+    }]
+  });
+}
+
+</script>
+
+<style>
+  body {
+    display: flex;
+  }
+  body > div:first-child {
+    width: 300px;
+    margin-right: 20px;
+  }
+  #input {
+    display: block;
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    border: 1px solid lightgrey;
+    box-sizing: border-box;
+  }
+  #message {
+    position: absolute;
+    z-index: 1;
+    top: 40%;
+    left: 15%;
+    color: red;
+    font-size: 40px;
+  }
+  #message:not(.visible) {
+    visibility: hidden;
+  }
+  #results {
+    display: block;
+    margin: 10px 0;
+    width: 100%;
+    height: 300px;
+    font-family: monospace;
+  }
+  #chart-container {
+    width: 450px;
+    height: 400px;
+    margin: 0 auto;
+  }
+</style>
+
+<div>
+  <input type="file" id="input" onchange="handleFiles(this.files)">
+  <span id="message">Працюю...</span>
+  <textarea id="results"></textarea>
+  <div><label>Заголовок: <input id="title" value="Якийсь заголовок" /></label><button onclick="draw()">Перемалювати</button></div>
+</div>
+
+<div id="image-container"></div>
+
+<div id="chart-container"></div>
