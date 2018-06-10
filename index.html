@@ -60,7 +60,6 @@ async function handleFiles(files) {
   document.getElementById("message").classList.add("visible");
 
   img = document.createElement("img");
-  img.width = 200;
   document.getElementById("image-container").appendChild(img);
 
   await new Promise(resolve => {
@@ -82,6 +81,9 @@ async function handleFiles(files) {
       resolve(pairs.map(([color, count]) => `${color} ${count} (${(100*count/sum).toFixed(4)}%)`).join("\n"));
     });
   });
+
+  // resample only after processing
+  img.width = 200;
 
   document.getElementById("results").value = data;
   document.getElementById("message").classList.remove("visible");
