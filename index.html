@@ -111,10 +111,10 @@ function draw2(lines) {
   const {colors, data} = lines
     .map(l => l.match(/(#?[0-9A-Fa-f]{6})\s+(\d+(\.\d+)?).*/))
     .filter(m => !!m)
-    .map(([_, color, percent]) => [color, percent])
-    .reduce((acc, [color, percent]) => {
+    .map(([_, color, count]) => [color, count])
+    .reduce((acc, [color, count]) => {
       acc.colors.push(color);
-      acc.data.push(+percent);
+      acc.data.push(+count);
       return acc;
     }, {colors: [], data: []});
 
