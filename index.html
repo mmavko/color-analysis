@@ -1,3 +1,9 @@
+<html manifest="cache.manifest">
+
+<script>
+  window.applicationCache.addEventListener("updateready", () => window.location.reload());
+</script>
+
 <script src="js/pixastic.core.js"></script>
 <script src="js/highcharts/highcharts.js"></script>
 <script src="js/highcharts/modules/exporting.js"></script>
@@ -221,3 +227,5 @@ function doDraw(containderId, title, colors, data) {
 <div id="image-container"></div>
 
 <div id="chart-container"></div>
+
+</html>

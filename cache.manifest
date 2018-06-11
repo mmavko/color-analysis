@@ -1,0 +1,5 @@
+CACHE MANIFEST
+# v1
+js/pixastic.core.js
+js/highcharts/highcharts.js
+js/highcharts/modules/exporting.js
