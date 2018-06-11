@@ -134,8 +134,7 @@ function doDraw(containderId, title, colors, data) {
 
     legend: {
       labelFormatter: function() {
-        return `${this.percentage.toFixed(2)} %`;
-        return `${this.y.toFixed(2)} %`;
+        return `${this.percentage.toFixed(1)} %`;
       },
       layout: 'vertical',
       verticalAlign: 'top',
