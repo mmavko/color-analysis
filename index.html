@@ -92,8 +92,17 @@ async function handleFiles(files) {
 
 
 function draw() {
+  const lines = document.getElementById("results").value.split("\n");
+  if (lines.length > 500) {
+    const msg = `Ти збираєшся зробити графік для ${lines.length} кольорів. Це буде довго! Продовжувати?`;
+    if (!confirm(msg)) return;
+  }
+  draw2(lines);
+}
 
-  const {colors, data} = document.getElementById("results").value.split("\n")
+
+function draw2(lines) {
+  const {colors, data} = lines
     .map(l => l.match(/(#?[0-9A-Fa-f]{6})\s+(\d+(\.\d+)?).*/))
     .filter(m => !!m)
     .map(([_, color, percent]) => [color, percent])
