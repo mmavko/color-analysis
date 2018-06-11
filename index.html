@@ -84,7 +84,7 @@ async function handleFiles(files) {
         .map(c => [c, returnValue[c]])
         .sort((a, b) => b[1] - a[1]);
       const sum = pairs.reduce((acc, [_, count]) => acc + count, 0);
-      resolve(pairs.map(([color, count]) => `${color} ${count} (${(100*count/sum).toFixed(4)}%)`).join("\n"));
+      resolve(pairs.map(([color, count]) => `${color} ${count} ${(100*count/sum).toFixed(4)}%`).join("\n"));
     });
   });
 
