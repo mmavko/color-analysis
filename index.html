@@ -68,6 +68,9 @@ async function handleFiles(files) {
   img = document.createElement("img");
   document.getElementById("image-container").appendChild(img);
 
+  // rerender
+  await new Promise(resolve => setTimeout(resolve, 50));
+
   await new Promise(resolve => {
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -178,14 +181,16 @@ function doDraw(containderId, title, colors, data) {
 
 <style>
   body {
+    margin-top: 100px;
     display: flex;
   }
-  body > div:first-child {
+  body > div:first-of-type {
     width: 300px;
     margin-right: 20px;
   }
   #input {
     display: block;
+    margin-bottom: 10px;
     width: 100%;
     height: 100px;
     padding: 10px;
@@ -205,7 +210,7 @@ function doDraw(containderId, title, colors, data) {
   }
   #results {
     display: block;
-    margin: 10px 0;
+    margin-bottom: 10px;
     width: 100%;
     height: 300px;
     font-family: monospace;
@@ -215,13 +220,53 @@ function doDraw(containderId, title, colors, data) {
     height: 400px;
     margin: 0 auto;
   }
+  header {
+    position: absolute;
+    top: 0;
+  }
+  section {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    background-color: white;
+    padding: 30px 200px;
+    text-align: center;
+    overflow: scroll;
+  }
 </style>
 
+<script>
+  function openHelp() { document.getElementById("help").style.display = "block"; }
+  function closeHelp() { document.getElementById("help").style.display = "none"; }
+</script>
+
+<header>
+  <p><a href="#" onclick="openHelp()">Методика оцінювання колориту ландшафту (етапи 1-4)</a></p>
+  <h3>Етап 3. Підрахунок співвідношення кольорів та побудова колористичних діаграм</h3>
+</header>
+
+<section id="help">
+  <div style="text-align: right"><a href="#" onclick="closeHelp()">Закрити</a></div>
+  <h2>
+    Схема етапів оцінювання колориту об’єктів ландшафтної архітекрути за методикою<br />
+    Н. О. Олексійченко, Н. В. Гатальської, М. С. Мавко (2016)
+  </h2>
+  <p><img src="methodology.png" width="100%" /></p>
+</section>
+
 <div>
+  <div>Завантажте індексоване зображення у форматі PNG:</div>
   <input type="file" id="input" onchange="handleFiles(this.files)">
   <span id="message">Працюю...</span>
+  <pre style="font-size: 12px; margin: 0;">HEX-код кольору   Кількість пікселів   % кольору</pre>
   <textarea id="results"></textarea>
-  <div><label>Заголовок: <input id="title" value="Якийсь заголовок" /></label><button onclick="draw()">Перемалювати</button></div>
+  <div>
+    <label>Заголовок: <input id="title" value="Введіть заголовок діаграми" /></label>
+    <button onclick="draw()">Перемалювати</button>
+  </div>
 </div>
 
 <div id="image-container"></div>
